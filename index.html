@@ -40,7 +40,12 @@
       document.body.scrollHeight,
       document.documentElement.scrollHeight
     );
-    window.parent.postMessage(JSON.stringify({ elfsightHeight: height }), '*');
+    var msg = JSON.stringify({ elfsightHeight: height });
+
+    // Post to direct parent (Wix embed iframe)
+    try { window.parent.postMessage(msg, '*'); } catch(e) {}
+    // Post to the top-level Wix page, skipping the middle layer
+    try { window.top.postMessage(msg, '*'); } catch(e) {}
   }
 
   setInterval(sendHeight, 300);
