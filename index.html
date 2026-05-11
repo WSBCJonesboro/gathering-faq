@@ -34,27 +34,35 @@
     <div class="elfsight-app-993111f2-dcb5-4fa5-8191-750efa146ee6" data-elfsight-app-lazy></div>
   </div>
 
-  <script>
-    function sendHeight() {
-      var height = document.body.scrollHeight;
-      window.parent.postMessage({ elfsightHeight: height }, '*');
-    }
+<script>
+  function sendHeight() {
+    var height = Math.max(
+      document.body.scrollHeight,
+      document.body.offsetHeight,
+      document.documentElement.scrollHeight
+    );
+    // Try both targeted origin and wildcard
+    try { window.parent.postMessage({ elfsightHeight: height }, 'https://www.wsbcjonesboro.com'); } catch(e) {}
+    try { window.parent.postMessage({ elfsightHeight: height }, '*'); } catch(e) {}
+  }
 
-    // Poll every 200ms to catch accordion open/close
-    setInterval(sendHeight, 200);
+  // Poll frequently
+  setInterval(sendHeight, 300);
 
-    // Fire after Elfsight finishes rendering
-    window.addEventListener('load', function () {
-      setTimeout(sendHeight, 1000);
-      setTimeout(sendHeight, 2500);
-    });
+  window.addEventListener('load', function () {
+    setTimeout(sendHeight, 500);
+    setTimeout(sendHeight, 1500);
+    setTimeout(sendHeight, 3000);
+  });
 
-    // ResizeObserver as a backup
-    if (window.ResizeObserver) {
-      var ro = new ResizeObserver(sendHeight);
-      ro.observe(document.body);
-    }
-  </script>
+  if (window.ResizeObserver) {
+    var ro = new ResizeObserver(sendHeight);
+    ro.observe(document.body);
+  }
 
+  // Also watch for any DOM mutations (accordion clicks)
+  var mo = new MutationObserver(sendHeight);
+  mo.observe(document.body, { childList: true, subtree: true, attributes: true });
+</script>
 </body>
 </html>
